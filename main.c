@@ -14,8 +14,7 @@ int test_miller_rabin(mpz_t n, size_t k);
 // Permet de faire les tests demandes par l'utilisateur
 void prime_test(args_opt opt);
 
-
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     // options entrees par l'utilisateur
     args_opt opt;
@@ -62,7 +61,6 @@ int test_fermat(mpz_t n, size_t k)
     {
         mpz_urandomm(a, state, n_min_two);
         mpz_add_ui(a, a, 1);
-        gmp_printf("a= %Zd\n", a);
         square_multiply(res, a, n_min_one, n);
 
         if (mpz_cmp_si(res, 1) != 0) // Si a^(n-1) mod n != 1
@@ -138,7 +136,6 @@ int test_miller_rabin(mpz_t n, size_t k)
     return 1;
 }
 
-
 /*
  * Fonction: prime_test
  * --------------------
@@ -163,7 +160,8 @@ void prime_test(args_opt opt)
     // si un k est donne par l'utilisateur
     if (opt.flag_k)
         k = opt.k;
-    else {
+    else
+    {
         k = 80;
         printf("k = %ld\n", k);
     }
@@ -174,7 +172,7 @@ void prime_test(args_opt opt)
     else
     {
         srand(time(NULL));
-        mpz_init_set_si(n, rand()%10000000);
+        mpz_init_set_si(n, rand() % 10000000);
         gmp_printf("n = %Zu\n", n);
     }
 
@@ -187,7 +185,7 @@ void prime_test(args_opt opt)
         puts("\n# TESTE DE FERMAT");
         printf("=> n est %s\n", test_fermat(n, k) ? "premier" : "composé");
 
-        if (opt.flag_t) 
+        if (opt.flag_t)
         {
             end = clock();
             time_fermat = end - begin;
@@ -202,21 +200,27 @@ void prime_test(args_opt opt)
 
         puts("\n# TESTE DE MILLER-RABIN");
         printf("=> n est %s\n", test_miller_rabin(n, k) ? "premier" : "composé");
-        
-        if (opt.flag_t) 
+
+        if (opt.flag_t)
         {
             end = clock();
             time_miller = end - begin;
         }
     }
 
-    if (opt.flag_t){
+    // Affiche le temps
+    if (opt.flag_t)
+    {
         puts("\n# Temps");
         if (time_fermat != -1)
             printf("- Fermat: %f secondes\n", time_fermat / CLOCKS_PER_SEC);
         if (time_miller != -1)
             printf("- Miller-Rabin: %f secondes\n", time_miller / CLOCKS_PER_SEC);
     }
+
+    // Affiche l'utilisation du programme
+    if (opt.flag_h)
+        usage();
 
     mpz_clear(n);
 }

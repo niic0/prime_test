@@ -23,7 +23,7 @@
  */
 void square_multiply(mpz_t r, mpz_t a, mpz_t h, mpz_t n)
 {
-    char *h_bin = malloc(1000000 * sizeof(char));
+    char *h_bin = malloc(100000 * sizeof(char));
 
     h_bin = mpz_get_str(NULL, 2, h);
     mpz_set(r, a);
@@ -46,64 +46,9 @@ void square_multiply(mpz_t r, mpz_t a, mpz_t h, mpz_t n)
 
 
 /*
- * Fonction: range_rand
- * --------------------
- *  Prend un nombre au hasard dans un ensemble tel que lower < r < upper. Pour
- *  obtenir le nombre aleatoire, on utilise la formule:
- *  NombreAleatoire mod (upper - lower +1) + lower
- *
- *  r: Stocke le nombre aleatoire
- *  lower: Borne basse de l'ensemble
- *  upper: Borne superieur de l'ensemble
- *
- *  retour: Ne retourne rien. Le nombre aleatoire est stocke dans la variable r.
- */
-void range_rand(mpz_t r, mpz_t lower, mpz_t upper)
-{
-    mpz_t one, mod;
-    mpz_init(mod);
-    mpz_init_set_si(one, 1);
-
-    // lower+1 <= r <= upper-1
-    mpz_add(lower, lower, one);
-    mpz_sub(upper, upper, one);
-
-    gmp_randstate_t state;
-    gmp_randinit_default(state);
-    gmp_randseed_ui(state, time(NULL));
-
-    mpz_urandomm(r, state, upper);
-
-    // Calcule: mod = upper - lower + 1
-    mpz_sub(mod, upper, lower);
-    mpz_add(mod, mod, one);
-
-    // Calcule: numberRand % mod + lower;
-    mpz_mod(r, r, mod);
-    mpz_add(r, r, lower);
-
-    // On remet lower et upper a leur valeur d origine
-    mpz_sub(lower, lower, one);
-    mpz_add(upper, upper, one);
-
-    mpz_clears(one, mod, NULL);
-    gmp_randclear(state);
-}
-
-
-/*
  * Fonction: decompose
  * -------------------
- *  Decompose n en 2^s * t. La variable s est obtenue en comptant le nombre de 
- *  0 apres le bit 1 de poids faible. La variable t est obtenue en tronquant
- *  les bits a 0 apres le bit a 1 de poids faible.
- *  Par exemple: 14 donne 1110 en binaire.
- *    - s = 1 car il y a 1 zero apres le bit de poids faible
- *    - t = 111 en binaire soit 7 en decimal
- *    On obtient bien 14 = 2^1 * 7
- *  
- *  Une fonction est donnee par gmp, mpz_get_d_2exp, mais j'ai prefere faire 
- *  cette fonction moi meme.
+ *  Decompose n en 2^s * t.
  * 
  *  n: Valeur a decomposer
  *  s: Exposant de la decomposition
@@ -111,39 +56,12 @@ void range_rand(mpz_t r, mpz_t lower, mpz_t upper)
  * 
  *  retour: Ne retourne rien. Les valeurs trouvees sont stockees dans s et t.
  */
-void decompose(mpz_t n, mpz_t s, mpz_t t)
-{
-    mpz_t one;
-    mpz_init_set_si(one, 1);
+void decompose(mpz_t n,mpz_t s,mpz_t t) {
+     mpz_set_ui(s,mpz_scan1(n, 0));
 
-    char* n_bin; // n en binaire
-    n_bin = malloc(100000 * sizeof(char));
-    mpz_get_str(n_bin, 2, n);
-
-    int i;
-    mpz_set_si(s, 0);
-
-    // On lit les bits de droite a gauche pour compter le nombre de 0 (=s)
-    for (i = strlen(n_bin) - 1; i >= 0; i--)
-    {
-        if (n_bin[i] == '1')
-            break;
-        mpz_add(s, s, one);
-    }
-
-    char* t_bin; // t en binaire
-    t_bin = malloc(100000 * sizeof(char));
-
-    for (int k = 0; k<=i; k++)
-        t_bin[k] = n_bin[k];
-
-    mpz_set_str(t, t_bin, 2);
-
-    mpz_clear(one);
-    free(n_bin);
-    free(t_bin);
+     mpz_tdiv_q_2exp(t, n, mpz_get_ui(s));
+     
 }
-
 
 /*
  * Fonction: handle_args
@@ -164,6 +82,7 @@ int handle_args(int argc, char **argv, args_opt* opt)
     opt->flag_k = 0;
     opt->flag_mr = 0;
     opt->flag_n = 0;
+    opt->flag_h = 0;
 
     int c;
 
@@ -191,6 +110,10 @@ int handle_args(int argc, char **argv, args_opt* opt)
 
         case 't':
             opt->flag_t = 1;
+            break;
+
+        case 'h':
+            opt->flag_h = 1;
             break;
 
         default:
