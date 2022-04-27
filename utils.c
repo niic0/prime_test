@@ -11,52 +11,26 @@
 /*
  * Fonction: square_multiply
  * -------------------------
- *  Implementation de l'algorithme Square and Multiply ou r = a^h.
- *
- *  r: Stocke le resultat de a^h
- *  a: Nombre mis a la puissance h
- *  h: Puissance appliquee a a
- * 
- *  retour: Ne retourne rien. Le résultat est stocke dans la variable r.
- */
-void square_multiply(mpz_t r, mpz_t a, mpz_t h)
-{
-    char *h_bin = mpz_get_str(NULL, 2, h);
-
-    mpz_set(r, a);
-
-    for (size_t i = 1; i < strlen(h_bin); i++)
-    {
-        mpz_mul(r, r, r);
-        if (h_bin[i] == '1')
-            mpz_mul(r, r, a);
-    }
-
-    free(h_bin);
-}
-
-
-/*
- * Fonction: exp_mod
- * -----------------
  *  Implementation de l'algorithme Square and Multiply appliquee au cas de
  *  l'exponentiation modulaire ou r = a^h mod n.
  *
- *  r: Stocke le resultat de a^h
+ *  r: Stocke le resultat de a^h mod n
  *  a: Nombre mis a la puissance h
  *  n: Le modulo
  *  h: Puissance appliquee a a
  * 
  *  retour: Ne retourne rien. Le résultat est stocke dans la variable r.
  */
-void exp_mod(mpz_t r, mpz_t a, mpz_t n, mpz_t h)
+void square_multiply(mpz_t r, mpz_t a, mpz_t h, mpz_t n)
 {
-    char *h_bin = mpz_get_str(NULL, 2, h);
+    char *h_bin = malloc(1000000 * sizeof(char));
 
+    h_bin = mpz_get_str(NULL, 2, h);
     mpz_set(r, a);
 
     for (size_t i = 1; i < strlen(h_bin); i++)
     {
+        //gmp_printf("n = %Zd , r = %Zd\n", n, r);
         mpz_mul(r, r, r);
         mpz_mod(r, r, n);
 
@@ -143,7 +117,7 @@ void decompose(mpz_t n, mpz_t s, mpz_t t)
     mpz_init_set_si(one, 1);
 
     char* n_bin; // n en binaire
-    n_bin = malloc(512*sizeof(char));
+    n_bin = malloc(100000 * sizeof(char));
     mpz_get_str(n_bin, 2, n);
 
     int i;
@@ -158,7 +132,7 @@ void decompose(mpz_t n, mpz_t s, mpz_t t)
     }
 
     char* t_bin; // t en binaire
-    t_bin = malloc(512*sizeof(char));
+    t_bin = malloc(100000 * sizeof(char));
 
     for (int k = 0; k<=i; k++)
         t_bin[k] = n_bin[k];

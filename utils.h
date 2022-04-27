@@ -15,12 +15,10 @@ typedef struct args_opt
     size_t k;
 } args_opt;
 
-// Implementation de l'algorithme Square and Multiply ou r = a^h.
-void square_multiply(mpz_t r, mpz_t a, mpz_t h);
 
 // Implementation de l'algorithme Square and Multiply appliquee au cas de
 // l'exponentiation modulaire ou r = a^h mod n.
-void exp_mod(mpz_t r, mpz_t a, mpz_t n, mpz_t h);
+void square_multiply(mpz_t r, mpz_t a, mpz_t h, mpz_t n);
 
 // Prend un nombre au hasard dans un ensemble tel que lower < r < upper.
 void range_rand(mpz_t r, mpz_t lower, mpz_t upper);

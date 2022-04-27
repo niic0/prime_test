@@ -47,27 +47,33 @@ int main(int argc, char** argv)
  */
 int test_fermat(mpz_t n, size_t k)
 {
-    mpz_t rand, res, one, n_min_one;
-    mpz_inits(rand, res, n_min_one, NULL);
-    mpz_init_set_si(one, 1);
+    mpz_t a, res, n_min_one, n_min_two;
+    gmp_randstate_t state;
 
-    mpz_sub(n_min_one, n, one);
+    mpz_inits(a, res, n_min_one, n_min_two, NULL);
+
+    gmp_randinit_default(state);
+    gmp_randseed_ui(state, time(NULL));
+
+    mpz_sub_ui(n_min_one, n, 1);
+    mpz_sub_ui(n_min_two, n, 2);
 
     for (size_t i = 0; i < k; i++)
     {
-        range_rand(rand, one, n_min_one);
-
-        square_multiply(res, rand, n_min_one);
-        mpz_mod(res, res, n); // res = a^(n-1) mod n
+        mpz_urandomm(a, state, n_min_two);
+        mpz_add_ui(a, a, 1);
+        gmp_printf("a= %Zd\n", a);
+        square_multiply(res, a, n_min_one, n);
 
         if (mpz_cmp_si(res, 1) != 0) // Si a^(n-1) mod n != 1
             return 0;                // Retourne composee
     }
 
-    mpz_clears(rand, res, one, n_min_one, NULL);
+    mpz_clears(a, res, n_min_one, NULL);
+    gmp_randclear(state);
+
     return 1;
 }
-
 
 /*
  * Fonction: test_miller_rabin
@@ -110,13 +116,13 @@ int test_miller_rabin(mpz_t n, size_t k)
     for (size_t i = 0; i < k; i++)
     {
         mpz_urandomm(a, state, n_min_one);
-        exp_mod(y, a, n, t);
+        square_multiply(y, a, n, t);
 
         if ((mpz_cmp_si(y, 1) != 0) && (mpz_cmp(y, min_one_mod_n) != 0))
         {
             for (size_t j = 0; j < mpz_get_ui(s); j++)
             {
-                exp_mod(y, y, n, two);
+                square_multiply(y, y, two, n);
 
                 if (mpz_cmp(y, one_mod_n) == 0)
                     return 0;
@@ -148,8 +154,8 @@ void prime_test(args_opt opt)
     size_t k;
 
     clock_t begin, end;
-    float time_fermat = -1;
-    float time_miller = -1;
+    double time_fermat = -1;
+    double time_miller = -1;
 
     if (!opt.flag_f && !opt.flag_k && !opt.flag_mr && !opt.flag_n && !opt.flag_t)
         usage();
@@ -157,10 +163,10 @@ void prime_test(args_opt opt)
     // si un k est donne par l'utilisateur
     if (opt.flag_k)
         k = opt.k;
-    else
+    else {
         k = 80;
-
-    printf("k = %ld\n", k);
+        printf("k = %ld\n", k);
+    }
 
     // si un n est donne par l'utilisateur
     if (opt.flag_n)
@@ -169,9 +175,8 @@ void prime_test(args_opt opt)
     {
         srand(time(NULL));
         mpz_init_set_si(n, rand()%10000000);
+        gmp_printf("n = %Zu\n", n);
     }
-
-    gmp_printf("n = %Zu\n", n);
 
     // teste de fermat
     if (opt.flag_f || (!opt.flag_f && !opt.flag_mr))
@@ -180,7 +185,7 @@ void prime_test(args_opt opt)
             begin = clock();
 
         puts("\n# TESTE DE FERMAT");
-        printf("=> %ld est %s\n", mpz_get_si(n), test_fermat(n, k) ? "premier" : "composé");
+        printf("=> n est %s\n", test_fermat(n, k) ? "premier" : "composé");
 
         if (opt.flag_t) 
         {
@@ -196,7 +201,7 @@ void prime_test(args_opt opt)
             begin = clock();
 
         puts("\n# TESTE DE MILLER-RABIN");
-        printf("=> %ld est %s\n", mpz_get_si(n), test_miller_rabin(n, k) ? "premier" : "composé");
+        printf("=> n est %s\n", test_miller_rabin(n, k) ? "premier" : "composé");
         
         if (opt.flag_t) 
         {
@@ -208,9 +213,9 @@ void prime_test(args_opt opt)
     if (opt.flag_t){
         puts("\n# Temps");
         if (time_fermat != -1)
-            printf("- Fermat: %f\n", time_fermat);
+            printf("- Fermat: %f secondes\n", time_fermat / CLOCKS_PER_SEC);
         if (time_miller != -1)
-            printf("- Miller-Rabin: %f\n", time_miller);
+            printf("- Miller-Rabin: %f secondes\n", time_miller / CLOCKS_PER_SEC);
     }
 
     mpz_clear(n);
