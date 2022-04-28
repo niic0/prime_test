@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <getopt.h>
-#include <gmp.h>
-#include <time.h>
-
-#include "utils.h"
-
+#include "./headers/utils.h"
 
 /*
  * Fonction: square_multiply
@@ -98,6 +90,7 @@ int handle_args(int argc, char **argv, args_opt* opt)
         case 'k':
             opt->flag_k = 1;
             opt->k = atol(optarg);
+            printf("handle args, k = %ld\n", opt->k);
             break;
 
         case 'm':

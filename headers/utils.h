@@ -1,7 +1,13 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include <stdio.h>
+#include <pthread.h>
 #include <gmp.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <time.h>
 
 // Options possibles pour les arguements
 typedef struct args_opt
