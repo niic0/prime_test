@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "./headers/utils.h"
 #include "./headers/miller_rabin_multithread.h"
 
 // Miller rabin multithreading
